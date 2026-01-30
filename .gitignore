@@ -1,0 +1,30 @@
+# Dune build artifacts
+_build/
+*.install
+
+# OCaml compiler artifacts
+*.cmi
+*.cmo
+*.cma
+*.cmx
+*.cmxa
+*.cmxs
+*.o
+*.a
+*.so
+*.obj
+*.lib
+*.dll
+
+# OCaml LSP
+.ocamllsp/
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# opam local switch
+_opam/

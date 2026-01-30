@@ -1,0 +1,20 @@
+(lang dune 3.17)
+
+(name ocaml_inception)
+
+(generate_opam_files true)
+
+(source
+ (github HolaJonas/OCaml-Inception))
+
+(authors "Jonas Killian")
+
+(license MIT)
+
+(package
+ (name ocaml_inception)
+ (synopsis "OCaml in OCaml")
+ (description "A simple OCaml compiler, implemented entirely in OCaml.")
+ (depends ocaml)
+)
+
