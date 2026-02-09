@@ -2,8 +2,8 @@ open Types
 open String
 open List
 
-let next_char_eq s i =
-  if i + 1 < String.length s then get s (i + 1) = '=' else false
+let next_char_eq (s : string) (i : int) (c : char) =
+  if i + 1 < String.length s then get s (i + 1) = c else false
 
 let is_whitespace (c : char) : bool =
   match c with ' ' | '\n' | '\t' -> true | _ -> false
@@ -38,6 +38,14 @@ let lex (s : string) : token list =
           lex' (i + 1) (ADD :: l)
       | '*' ->
           lex' (i + 1) (MUL :: l)
+      | '/' ->
+          lex' (i + 1) (DIV :: l)
+      | '&' ->
+          if next_char_eq s i '&' then lex' (i + 2) (AND :: l)
+          else failwith "unknown token: &"
+      | '|' ->
+          if next_char_eq s i '|' then lex' (i + 2) (OR :: l)
+          else failwith "unknown token: |"
       | '=' ->
           lex' (i + 1) (EQ :: l)
       | '(' ->
@@ -45,14 +53,13 @@ let lex (s : string) : token list =
       | ')' ->
           lex' (i + 1) (RP :: l)
       | '<' ->
-          if next_char_eq s i then lex' (i + 2) (LEQ :: l)
+          if next_char_eq s i '=' then lex' (i + 2) (LEQ :: l)
           else lex' (i + 1) (L :: l)
       | '>' ->
-          if next_char_eq s i then lex' (i + 2) (GEQ :: l)
+          if next_char_eq s i '=' then lex' (i + 2) (GEQ :: l)
           else lex' (i + 1) (G :: l)
       | '-' ->
-          if i + 1 < whole_length && get s (i + 1) = '>' then
-            lex' (i + 2) (ARR :: l)
+          if next_char_eq s i '>' then lex' (i + 2) (ARR :: l)
           else lex' (i + 1) (SUB :: l)
       | x -> (
           if is_whitespace x then lex' (i + 1) l

@@ -4,6 +4,9 @@ type token =
   | ADD
   | SUB
   | MUL
+  | DIV
+  | OR
+  | AND
   | LP
   | RP
   | EQ
@@ -26,7 +29,7 @@ type var = string
 
 type con = Bcon of bool | Icon of int
 
-type op = Add | Sub | Mul | Leq | Geq | Gt | Lt | Eq
+type op = Add | Sub | Mul | Div | Leq | Geq | Gt | Lt | Eq | And | Or
 
 type exp =
   | Var of var

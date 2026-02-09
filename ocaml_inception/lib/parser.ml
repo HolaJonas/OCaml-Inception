@@ -9,22 +9,38 @@ let verify (t : token) (l : token list) =
 
 let parse_infix (list : token list) : exp * token list =
   let rec parse_eq (l : token list) : exp * token list =
-    match parse_add l with
+    match parse_or l with
     | e, EQ :: tl ->
-        let e', tl = parse_add tl in
+        let e', tl = parse_or tl in
         (Oapp (Eq, e, e'), tl)
     | e, GEQ :: tl ->
-        let e', tl = parse_add tl in
+        let e', tl = parse_or tl in
         (Oapp (Geq, e, e'), tl)
     | e, LEQ :: tl ->
-        let e', tl = parse_add tl in
+        let e', tl = parse_or tl in
         (Oapp (Leq, e, e'), tl)
     | e, G :: tl ->
-        let e', tl = parse_add tl in
+        let e', tl = parse_or tl in
         (Oapp (Gt, e, e'), tl)
     | e, L :: tl ->
-        let e', tl = parse_add tl in
+        let e', tl = parse_or tl in
         (Oapp (Lt, e, e'), tl)
+    | s ->
+        s
+  and parse_or (l : token list) : exp * token list = parse_or' (parse_and l)
+  and parse_or' (t : exp * token list) : exp * token list =
+    match t with
+    | e, OR :: tl ->
+        let e', tl = parse_and tl in
+        parse_or' (Oapp (Or, e, e'), tl)
+    | s ->
+        s
+  and parse_and (l : token list) : exp * token list = parse_and' (parse_add l)
+  and parse_and' (t : exp * token list) : exp * token list =
+    match t with
+    | e, AND :: tl ->
+        let e', tl = parse_add tl in
+        parse_and' (Oapp (And, e, e'), tl)
     | s ->
         s
   and parse_add (l : token list) : exp * token list = parse_add' (parse_mul l)
@@ -45,6 +61,9 @@ let parse_infix (list : token list) : exp * token list =
     | e, MUL :: tl ->
         let e', tl = parse_literal tl in
         parse_mul' (Oapp (Mul, e, e'), tl)
+    | e, DIV :: tl ->
+        let e', tl = parse_literal tl in
+        parse_mul' (Oapp (Div, e, e'), tl)
     | s ->
         s
   and parse_literal (l : token list) : exp * token list =
