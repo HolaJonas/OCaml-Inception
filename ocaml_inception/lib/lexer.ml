@@ -73,6 +73,20 @@ let lex (s : string) : token list =
                   lex' (i + ln) (CON (BCONST true) :: l)
               | "false" ->
                   lex' (i + ln) (CON (BCONST false) :: l)
+              | "let" ->
+                  lex' (i + ln) (LET :: l)
+              | "rec" ->
+                  lex' (i + ln) (REC :: l)
+              | "fun" ->
+                  lex' (i + ln) (LAM :: l)
+              | "in" ->
+                  lex' (i + ln) (IN :: l)
+              | "if" ->
+                  lex' (i + ln) (IF :: l)
+              | "else" ->
+                  lex' (i + ln) (ELSE :: l)
+              | "then" ->
+                  lex' (i + ln) (THEN :: l)
               | x ->
                   lex' (i + ln) (VAR x :: l) )
   in
