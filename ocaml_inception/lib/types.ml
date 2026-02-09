@@ -26,7 +26,7 @@ type var = string
 
 type con = Bcon of bool | Icon of int
 
-type op = Add | Sub | Mul | Leq
+type op = Add | Sub | Mul | Leq | Geq | Gt | Lt | Eq
 
 type exp =
   | Var of var
