@@ -40,3 +40,5 @@ type exp =
   | Lam of var * exp
   | Let of var * exp * exp
   | Letrec of var * var * exp * exp
+
+  type ty = Int | Bool | Arrow of ty * ty
