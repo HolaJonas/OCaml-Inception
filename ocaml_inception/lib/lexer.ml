@@ -8,12 +8,19 @@ let next_char_eq (s : string) (i : int) (c : char) =
 let is_whitespace (c : char) : bool =
   match c with ' ' | '\n' | '\t' -> true | _ -> false
 
+let is_delimiter (c : char) : bool =
+  match c with
+  | '+' | '-' | '*' | '/' | '&' | '|' | '=' | '(' | ')' | '<' | '>' ->
+      true
+  | _ ->
+      false
+
 let get_full_string (s : string) (i : int) : string * int =
   let rec aux (i' : int) ((substr : string), (length : int)) : string * int =
     if i' >= String.length s then (substr, length)
     else
       let x = get s i' in
-      if is_whitespace x then (substr, length)
+      if is_whitespace x || is_delimiter x then (substr, length)
       else aux (i' + 1) (substr ^ String.make 1 x, length + 1)
   in
   aux i ("", 0)
