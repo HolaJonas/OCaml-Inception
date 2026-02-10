@@ -51,22 +51,31 @@ let parse_infix (list : token list) : exp * token list =
         parse_add' (Oapp (Add, e, e'), tl)
     | e, SUB :: tl ->
         let e', tl = parse_mul tl in
-        parse_add' (Oapp (Add, e, e'), tl)
+        parse_add' (Oapp (Sub, e, e'), tl)
     | s ->
         s
   and parse_mul (l : token list) : exp * token list =
-    parse_mul' (parse_literal l)
+    parse_mul' (parse_funcapp l)
   and parse_mul' (t : exp * token list) : exp * token list =
     match t with
     | e, MUL :: tl ->
-        let e', tl = parse_literal tl in
+        let e', tl = parse_funcapp tl in
         parse_mul' (Oapp (Mul, e, e'), tl)
     | e, DIV :: tl ->
-        let e', tl = parse_literal tl in
+        let e', tl = parse_funcapp tl in
         parse_mul' (Oapp (Div, e, e'), tl)
     | s ->
         s
-  and parse_literal (l : token list) : exp * token list =
+  and parse_funcapp (l : token list) : exp * token list =
+    parse_funcapp' (parse_atom l)
+  and parse_funcapp' (t : exp * token list) : exp * token list =
+    match t with
+    | e, (CON _ | VAR _ | LP) :: _ ->
+        let e', tl = parse_atom ((fun (_, b) -> b) t) in
+        parse_funcapp' (Fapp (e, e'), tl)
+    | s ->
+        s
+  and parse_atom (l : token list) : exp * token list =
     match l with
     | CON (BCONST x) :: tl ->
         (Con (Bcon x), tl)
@@ -79,9 +88,9 @@ let parse_infix (list : token list) : exp * token list =
       | e, RP :: tl ->
           (e, tl)
       | _ ->
-          failwith "parse_literal: missing RP" )
+          failwith "parse_atom: missing RP" )
     | _ ->
-        failwith "parse_literal: error while parsing literal"
+        failwith "parse_atom: error while parsing literal"
   in
   parse_eq list
 
