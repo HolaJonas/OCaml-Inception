@@ -41,4 +41,12 @@ type exp =
   | Let of var * exp * exp
   | Letrec of var * var * exp * exp
 
-type ty = Int | Bool | Arrow of ty * ty
+type ty = Int | Bool | Arrow of ty * ty | TVar of int
+
+type scheme = Forall of int list * ty
+
+let counter = ref 0
+
+let new_var () : ty =
+  let n = !counter in
+  incr counter ; TVar n
