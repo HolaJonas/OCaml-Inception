@@ -1,3 +1,5 @@
+open Env
+
 type const = BCONST of bool | ICONST of int
 
 type token =
@@ -50,3 +52,9 @@ let counter = ref 0
 let new_var () : ty =
   let n = !counter in
   incr counter ; TVar n
+
+type value =
+  | Bval of bool
+  | Ival of int
+  | Closure of var * exp * (var, value) env
+  | Rclosure of var * var * exp * (var, value) env
