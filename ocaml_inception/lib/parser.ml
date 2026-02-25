@@ -25,6 +25,8 @@ let rec parse (list : token list) : exp * token list =
   | LAM :: VAR x :: ARR :: tl ->
       let e', tl = parse tl in
       (Lam (x, e'), tl)
+  | LP :: tl ->
+      parse_tuple_inner tl []
   | tl ->
       parse_eq tl
 
@@ -47,6 +49,15 @@ and parse_eq (l : token list) : exp * token list =
       (Oapp (Lt, e, e'), tl)
   | s ->
       s
+
+and parse_tuple_inner (list : token list) (aux : exp list) : exp * token list =
+  match parse list with
+  | e, RP :: tl ->
+      (Tuple (aux @ [e]), tl)
+  | e, COMMA :: tl ->
+      parse_tuple_inner tl (aux @ [e])
+  | _ ->
+      failwith "parse_tuple_inner: Unexpected tuple format"
 
 and parse_or (l : token list) : exp * token list = parse_or' (parse_and l)
 

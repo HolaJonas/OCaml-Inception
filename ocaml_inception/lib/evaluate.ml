@@ -54,6 +54,8 @@ let rec evaluate (env : (var, value) env) (e : exp) =
       evaluate (update env f (Rclosure (f, x, e1, env))) e2
   | Lam (x, e) ->
       Closure (x, e, env)
+  | Tuple l ->
+      Tuple (List.fold_left (fun a b -> a @ [evaluate env b]) [] l)
   | Fapp (e1, e2) -> (
       let v1 = evaluate env e1 in
       let v2 = evaluate env e2 in

@@ -11,6 +11,8 @@ let rec apply_substitution (env : (int, ty) env) (t : ty) : ty =
         TVar x )
   | Arrow (t1, t2) ->
       Arrow (apply_substitution env t1, apply_substitution env t2)
+  | Tuple l ->
+      Tuple (List.map (fun tp -> apply_substitution env tp) l)
   | Int ->
       Int
   | Bool ->
@@ -22,6 +24,8 @@ let rec occurs (env : (int, ty) env) (id : int) (t : ty) : bool =
       x = id
   | Arrow (t1, t2) ->
       occurs env id t1 || occurs env id t2
+  | Tuple l ->
+      List.exists (fun tp -> occurs env id tp) l
   | Int | Bool ->
       false
 
@@ -102,3 +106,13 @@ let rec infer_type (tenv : (var, ty) env) (sub : (int, ty) env) (e : exp) :
       let tenv = update tenv f (apply_substitution sub ft) in
       let t, sub = infer_type tenv sub e1 in
       (t, sub)
+  | Tuple l ->
+      let types, sub = infer_tuple tenv sub l in
+      (Tuple types, sub)
+
+and infer_tuple tenv sub exps =
+  List.fold_left
+    (fun (types, sub) exp ->
+      let t, sub = infer_type tenv sub exp in
+      (types @ [t], sub) )
+    ([], sub) exps

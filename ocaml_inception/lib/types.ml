@@ -24,6 +24,7 @@ type token =
   | LET
   | IN
   | REC
+  | COMMA
   | CON of const
   | VAR of string
 
@@ -42,8 +43,9 @@ type exp =
   | Lam of var * exp
   | Let of var * exp * exp
   | Letrec of var * var * exp * exp
+  | Tuple of exp list
 
-type ty = Int | Bool | Arrow of ty * ty | TVar of int
+type ty = Int | Bool | Arrow of ty * ty | TVar of int | Tuple of ty list
 
 type scheme = Forall of int list * ty
 
@@ -56,5 +58,6 @@ let new_var () : ty =
 type value =
   | Bval of bool
   | Ival of int
+  | Tuple of value list
   | Closure of var * exp * (var, value) env
   | Rclosure of var * var * exp * (var, value) env

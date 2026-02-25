@@ -10,7 +10,7 @@ let is_whitespace (c : char) : bool =
 
 let is_delimiter (c : char) : bool =
   match c with
-  | '+' | '-' | '*' | '/' | '&' | '|' | '=' | '(' | ')' | '<' | '>' ->
+  | '+' | '-' | '*' | '/' | '&' | '|' | '=' | '(' | ')' | '<' | '>' | ',' ->
       true
   | _ ->
       false
@@ -41,6 +41,8 @@ let lex (s : string) : token list =
     if i >= whole_length then l
     else
       match get s i with
+      | ',' ->
+          lex' (i + 1) (COMMA :: l)
       | '+' ->
           lex' (i + 1) (ADD :: l)
       | '*' ->
