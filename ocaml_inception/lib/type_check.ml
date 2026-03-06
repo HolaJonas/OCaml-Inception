@@ -42,6 +42,8 @@ let rec unify (env : (int, ty) env) (t1 : ty) (t2 : ty) : (int, ty) env =
   | Arrow (a1, a2), Arrow (b1, b2) ->
       let env = unify env a1 b1 in
       unify env a2 b2
+  | Tuple l1, Tuple l2 when List.length l1 = List.length l2 ->
+      List.fold_left2 (fun env t1 t2 -> unify env t1 t2) env l1 l2
   | _ ->
       failwith "unify: incompatible types"
 
@@ -53,6 +55,21 @@ let op_types (o : op) : ty * ty =
       (Bool, Bool)
   | Eq | Leq | Geq | Lt | Gt ->
       (Int, Bool)
+
+let rec bind_pattern_type (tenv : (var, ty) env) (sub : (int, ty) env)
+    (p : pattern) (t : ty) : (var, ty) env * (int, ty) env =
+  match p with
+  | PVar x ->
+      (update tenv x t, sub)
+  | PWildcard ->
+      (tenv, sub)
+  | PTuple ps ->
+      let tvars = List.map (fun _ -> new_var ()) ps in
+      let sub = unify sub t (Tuple tvars) in
+      List.fold_left2
+        (fun (tenv, sub) pat tp ->
+          bind_pattern_type tenv sub pat (apply_substitution sub tp) )
+        (tenv, sub) ps tvars
 
 let rec infer_type (tenv : (var, ty) env) (sub : (int, ty) env) (e : exp) :
     ty * (int, ty) env =
@@ -92,11 +109,12 @@ let rec infer_type (tenv : (var, ty) env) (sub : (int, ty) env) (e : exp) :
       let t2, sub = infer_type tenv sub e2 in
       let sub = unify sub t1 t2 in
       (apply_substitution sub t1, sub)
-  | Let (x, e, e1) ->
+  | Let (pat, e, e1) ->
       let t, sub = infer_type tenv sub e in
-      let tenv = update tenv x (apply_substitution sub t) in
-      let t, sub = infer_type tenv sub e1 in
-      (t, sub)
+      let tenv, sub =
+        bind_pattern_type tenv sub pat (apply_substitution sub t)
+      in
+      infer_type tenv sub e1
   | Letrec (f, x, e, e1) ->
       let ft = new_var () in
       let t = new_var () in

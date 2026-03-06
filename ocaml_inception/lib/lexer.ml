@@ -41,6 +41,8 @@ let lex (s : string) : token list =
     if i >= whole_length then l
     else
       match get s i with
+      | '_' ->
+          lex' (i + 1) (UNDERSCORE :: l)
       | ',' ->
           lex' (i + 1) (COMMA :: l)
       | '+' ->

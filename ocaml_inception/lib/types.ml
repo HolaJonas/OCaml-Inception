@@ -25,10 +25,13 @@ type token =
   | IN
   | REC
   | COMMA
+  | UNDERSCORE
   | CON of const
   | VAR of string
 
 type var = string
+
+type pattern = PVar of var | PWildcard | PTuple of pattern list
 
 type con = Bcon of bool | Icon of int
 
@@ -41,7 +44,7 @@ type exp =
   | Fapp of exp * exp
   | If of exp * exp * exp
   | Lam of var * exp
-  | Let of var * exp * exp
+  | Let of pattern * exp * exp
   | Letrec of var * var * exp * exp
   | Tuple of exp list
 

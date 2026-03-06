@@ -13,10 +13,11 @@ let rec parse (list : token list) : exp * token list =
       let e, tl = parse tl in
       let e', tl = parse (verify IN tl) in
       (Letrec (f, x, e, e'), tl)
-  | LET :: VAR x :: EQ :: tl ->
-      let e, tl = parse tl in
+  | LET :: tl ->
+      let pat, tl = parse_pattern tl in
+      let e, tl = parse (verify EQ tl) in
       let e', tl = parse (verify IN tl) in
-      (Let (x, e, e'), tl)
+      (Let (pat, e, e'), tl)
   | IF :: tl ->
       let e, tl = parse tl in
       let e', tl = parse (verify THEN tl) in
@@ -49,6 +50,27 @@ and parse_eq (l : token list) : exp * token list =
       (Oapp (Lt, e, e'), tl)
   | s ->
       s
+
+and parse_pattern (l : token list) : pattern * token list =
+  match l with
+  | UNDERSCORE :: tl ->
+      (PWildcard, tl)
+  | VAR x :: tl ->
+      (PVar x, tl)
+  | LP :: tl ->
+      parse_tuple_pattern tl []
+  | _ ->
+      parse_tuple_pattern l []
+
+and parse_tuple_pattern (l : token list) (aux : pattern list) :
+    pattern * token list =
+  match parse_pattern l with
+  | p, RP :: tl ->
+      (PTuple (aux @ [p]), tl)
+  | p, COMMA :: tl ->
+      parse_tuple_pattern tl (aux @ [p])
+  | _ ->
+      failwith "parse_tuple_pattern: invalid tuple pattern"
 
 and parse_tuple_inner (list : token list) (aux : exp list) : exp * token list =
   match parse list with

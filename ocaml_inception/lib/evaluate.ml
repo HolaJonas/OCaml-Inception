@@ -28,6 +28,19 @@ let op_values (op : op) (v1 : value) (v2 : value) : value =
   | _, _, _ ->
       failwith "op_values: incompatible types"
 
+let rec match_pattern (pat : pattern) (v : value) : (var * value) list =
+  match pat with
+  | PVar x ->
+      [(x, v)]
+  | PWildcard ->
+      []
+  | PTuple pats -> (
+    match v with
+    | Tuple vs ->
+        List.concat (List.map2 match_pattern pats vs)
+    | _ ->
+        failwith "match_pattern: tuple pattern requires tuple value" )
+
 let rec evaluate (env : (var, value) env) (e : exp) =
   match e with
   | Con (Bcon v) ->
@@ -48,8 +61,13 @@ let rec evaluate (env : (var, value) env) (e : exp) =
         failwith "evaluate: if must have a bool as first attribute" )
   | Oapp (op, e1, e2) ->
       op_values op (evaluate env e1) (evaluate env e2)
-  | Let (x, e1, e2) ->
-      evaluate (update env x (evaluate env e1)) e2
+  | Let (pat, e1, e2) ->
+      let v = evaluate env e1 in
+      let bindings = match_pattern pat v in
+      let env' =
+        List.fold_left (fun acc (x, vx) -> update acc x vx) env bindings
+      in
+      evaluate env' e2
   | Letrec (f, x, e1, e2) ->
       evaluate (update env f (Rclosure (f, x, e1, env))) e2
   | Lam (x, e) ->
